@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import random
 
 # Load the Random Forest model and scaler
 random_forest_model = joblib.load('random_forest.pkl')  # Ensure the model file is in the same directory
@@ -12,36 +11,36 @@ if "prediction_result" not in st.session_state:
     st.session_state.prediction_result = None
 
 # Streamlit App Title
-st.title("Water Quality Prediction App")
-st.write("Use this app to predict whether the water is safe to drink based on water quality parameters.")
+st.title("Water Quality Prediction Application")
+st.write("Use this application to predict whether the water is drinkable based on water quality parameters.")
 
 # Input section
 st.header("Enter Water Quality Parameters")
 col1, col2 = st.columns(2)
 
 with col1:
-    ph = random.uniform(0.0, 14.0)
-    hardness = random.uniform(0.0, 300.0)
-    solids = random.uniform(0.0, 50000.0)
-    chloramines = random.uniform(0.0, 12.0)
-    sulfate = random.uniform(0.0, 500.0)
+    ph = st.slider("pH Level", 0.0, 14.0, 7.0)
+    hardness = st.slider("Hardness (mg/L)", 0.0, 300.0, 100.0)
+    solids = st.slider("Total Dissolved Solids (mg/L)", 0.0, 50000.0, 20000.0)
+    chloramines = st.slider("Chloramines (ppm)", 0.0, 12.0, 6.0)
+    sulfate = st.slider("Sulfate (mg/L)", 0.0, 500.0, 200.0)
 
 with col2:
-    conductivity = random.uniform(0.0, 800.0)
-    organic_carbon = random.uniform(0.0, 30.0)
-    trihalomethanes = random.uniform(0.0, 120.0)
-    turbidity = random.uniform(0.0, 5.0)
+    conductivity = st.slider("Conductivity (uS/cm)", 0.0, 800.0, 400.0)
+    organic_carbon = st.slider("Organic Carbon (ppm)", 0.0, 30.0, 15.0)
+    trihalomethanes = st.slider("Trihalomethanes (ppb)", 0.0, 120.0, 60.0)
+    turbidity = st.slider("Turbidity (NTU)", 0.0, 5.0, 2.5)
 
 if st.button("Predict Water Quality"):
     # Combine user input into a DataFrame
     input_data_english = pd.DataFrame({
-        'ph': [ph],
+        'pH': [ph],
         'Hardness': [hardness],
-        'Solids': [solids],
+        'Total Dissolved Solids': [solids],
         'Chloramines': [chloramines],
         'Sulfate': [sulfate],
         'Conductivity': [conductivity],
-        'Organic_carbon': [organic_carbon],
+        'Organic Carbon': [organic_carbon],
         'Trihalomethanes': [trihalomethanes],
         'Turbidity': [turbidity]
     })
@@ -51,9 +50,9 @@ if st.button("Predict Water Quality"):
     # Make predictions
     prediction = random_forest_model.predict(scaled_input)[0]
     prediction_label = (
-        "Safe to Drink (Safe for Consumption)"
+        "Drinkable (Safe for Consumption)"
         if prediction == 1 else
-        "Not Safe to Drink (Not Safe for Consumption)"
+        "Not Drinkable (Not Safe for Consumption)"
     )
 
     # Store result in session state
@@ -66,7 +65,7 @@ if st.button("Predict Water Quality"):
 
 # Result section
 if st.session_state.prediction_result:
-    st.header("Prediction Results")
+    st.header("Prediction Result")
     st.write("### Entered Data")
     st.write(st.session_state.prediction_result["input_data"])
 
@@ -77,5 +76,5 @@ if st.session_state.prediction_result:
         st.write("### Prediction Probabilities")
         st.write(pd.DataFrame(
             st.session_state.prediction_result["probabilities"],
-            columns=["Not Safe to Drink", "Safe to Drink"]
+            columns=["Not Drinkable", "Drinkable"]
         ))
