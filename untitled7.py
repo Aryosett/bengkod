@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import random
 
 # Load the Random Forest model and scaler
 random_forest_model = joblib.load('random_forest.pkl')  # Ensure the model file is in the same directory
@@ -11,50 +12,38 @@ if "prediction_result" not in st.session_state:
     st.session_state.prediction_result = None
 
 # Streamlit App Title
-st.title("Aplikasi Prediksi Kualitas Air")
-st.write("Gunakan aplikasi ini untuk memprediksi apakah air dapat diminum berdasarkan parameter kualitas air.")
+st.title("Water Quality Prediction App")
+st.write("Use this app to predict whether the water is safe to drink based on water quality parameters.")
 
 # Input section
-st.header("Masukkan Parameter Kualitas Air")
+st.header("Enter Water Quality Parameters")
 col1, col2 = st.columns(2)
 
 with col1:
-    ph = st.slider("Tingkat pH", 0.0, 14.0, 7.0)
-    hardness = st.slider("Kekerasan (mg/L)", 0.0, 300.0, 100.0)
-    solids = st.slider("Padatan Terlarut (mg/L)", 0.0, 50000.0, 20000.0)
-    chloramines = st.slider("Kloramin (ppm)", 0.0, 12.0, 6.0)
-    sulfate = st.slider("Sulfat (mg/L)", 0.0, 500.0, 200.0)
+    ph = random.uniform(0.0, 14.0)
+    hardness = random.uniform(0.0, 300.0)
+    solids = random.uniform(0.0, 50000.0)
+    chloramines = random.uniform(0.0, 12.0)
+    sulfate = random.uniform(0.0, 500.0)
 
 with col2:
-    conductivity = st.slider("Konduktivitas (uS/cm)", 0.0, 800.0, 400.0)
-    organic_carbon = st.slider("Karbon Organik (ppm)", 0.0, 30.0, 15.0)
-    trihalomethanes = st.slider("Trihalometana (ppb)", 0.0, 120.0, 60.0)
-    turbidity = st.slider("Kekeruhan (NTU)", 0.0, 5.0, 2.5)
+    conductivity = random.uniform(0.0, 800.0)
+    organic_carbon = random.uniform(0.0, 30.0)
+    trihalomethanes = random.uniform(0.0, 120.0)
+    turbidity = random.uniform(0.0, 5.0)
 
-if st.button("Prediksi Kualitas Air"):
+if st.button("Predict Water Quality"):
     # Combine user input into a DataFrame
-    input_data_indonesia = pd.DataFrame({
-        'Tingkat pH': [ph],
-        'Kekerasan (mg/L)': [hardness],
-        'Padatan Terlarut (mg/L)': [solids],
-        'Kloramin (ppm)': [chloramines],
-        'Sulfat (mg/L)': [sulfate],
-        'Konduktivitas (uS/cm)': [conductivity],
-        'Karbon Organik (ppm)': [organic_carbon],
-        'Trihalometana (ppb)': [trihalomethanes],
-        'Kekeruhan (NTU)': [turbidity]
-    })
-
-    input_data_english = input_data_indonesia.rename(columns={
-        'Tingkat pH': 'ph',
-        'Kekerasan (mg/L)': 'Hardness',
-        'Padatan Terlarut (mg/L)': 'Solids',
-        'Kloramin (ppm)': 'Chloramines',
-        'Sulfat (mg/L)': 'Sulfate',
-        'Konduktivitas (uS/cm)': 'Conductivity',
-        'Karbon Organik (ppm)': 'Organic_carbon',
-        'Trihalometana (ppb)': 'Trihalomethanes',
-        'Kekeruhan (NTU)': 'Turbidity'
+    input_data_english = pd.DataFrame({
+        'ph': [ph],
+        'Hardness': [hardness],
+        'Solids': [solids],
+        'Chloramines': [chloramines],
+        'Sulfate': [sulfate],
+        'Conductivity': [conductivity],
+        'Organic_carbon': [organic_carbon],
+        'Trihalomethanes': [trihalomethanes],
+        'Turbidity': [turbidity]
     })
 
     scaled_input = scaler.transform(input_data_english)
@@ -62,14 +51,14 @@ if st.button("Prediksi Kualitas Air"):
     # Make predictions
     prediction = random_forest_model.predict(scaled_input)[0]
     prediction_label = (
-        "Dapat Diminum (Aman untuk Dikonsumsi)"
+        "Safe to Drink (Safe for Consumption)"
         if prediction == 1 else
-        "Tidak Dapat Diminum (Tidak Aman untuk Dikonsumsi)"
+        "Not Safe to Drink (Not Safe for Consumption)"
     )
 
     # Store result in session state
     st.session_state.prediction_result = {
-        "input_data": input_data_indonesia,
+        "input_data": input_data_english,
         "prediction_label": prediction_label,
         "probabilities": random_forest_model.predict_proba(scaled_input)
         if hasattr(random_forest_model, "predict_proba") else None
@@ -77,16 +66,16 @@ if st.button("Prediksi Kualitas Air"):
 
 # Result section
 if st.session_state.prediction_result:
-    st.header("Hasil Prediksi")
-    st.write("### Data yang Dimasukkan")
+    st.header("Prediction Results")
+    st.write("### Entered Data")
     st.write(st.session_state.prediction_result["input_data"])
 
-    st.write("### Prediksi")
+    st.write("### Prediction")
     st.success(st.session_state.prediction_result["prediction_label"])
 
     if st.session_state.prediction_result["probabilities"] is not None:
-        st.write("### Probabilitas Prediksi")
+        st.write("### Prediction Probabilities")
         st.write(pd.DataFrame(
             st.session_state.prediction_result["probabilities"],
-            columns=["Tidak Dapat Diminum", "Dapat Diminum"]
+            columns=["Not Safe to Drink", "Safe to Drink"]
         ))
