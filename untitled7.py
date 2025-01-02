@@ -6,6 +6,10 @@ import joblib
 random_forest_model = joblib.load('random_forest.pkl')  # Ensure the model file is in the same directory
 scaler = joblib.load('scaler.pkl')  # Ensure the scaler file is in the same directory
 
+# Initialize session state for tab management
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = "Input Data"
+
 # Streamlit App Title
 st.title("Aplikasi Prediksi Kualitas Air")
 st.write("Gunakan aplikasi ini untuk memprediksi apakah air dapat diminum berdasarkan parameter kualitas air.")
@@ -41,44 +45,53 @@ with input_tab:
     })
 
     # Add a submit button
-    submit_button = st.button("Kirim dan Prediksi")
+    if st.button("Kirim dan Prediksi"):
+        # Store input data in session state
+        st.session_state.input_data = input_data_indonesia
 
-# Check if the submit button is pressed
-if submit_button:
-    # Map feature names from Bahasa Indonesia to English
-    input_data_english = input_data_indonesia.rename(columns={
-        'Tingkat pH': 'ph',
-        'Kekerasan (mg/L)': 'Hardness',
-        'Padatan Terlarut (mg/L)': 'Solids',
-        'Kloramin (ppm)': 'Chloramines',
-        'Sulfat (mg/L)': 'Sulfate',
-        'Konduktivitas (uS/cm)': 'Conductivity',
-        'Karbon Organik (ppm)': 'Organic_carbon',
-        'Trihalometana (ppb)': 'Trihalomethanes',
-        'Kekeruhan (NTU)': 'Turbidity'
-    })
+        # Map feature names from Bahasa Indonesia to English
+        input_data_english = input_data_indonesia.rename(columns={
+            'Tingkat pH': 'ph',
+            'Kekerasan (mg/L)': 'Hardness',
+            'Padatan Terlarut (mg/L)': 'Solids',
+            'Kloramin (ppm)': 'Chloramines',
+            'Sulfat (mg/L)': 'Sulfate',
+            'Konduktivitas (uS/cm)': 'Conductivity',
+            'Karbon Organik (ppm)': 'Organic_carbon',
+            'Trihalometana (ppb)': 'Trihalomethanes',
+            'Kekeruhan (NTU)': 'Turbidity'
+        })
 
-    # Normalize user input using the pre-trained scaler
-    scaled_input = scaler.transform(input_data_english)
+        # Normalize user input using the pre-trained scaler
+        scaled_input = scaler.transform(input_data_english)
 
-    # Make predictions using the Random Forest model
-    prediction = random_forest_model.predict(scaled_input)[0]
-    prediction_label = "Dapat Diminum (Aman untuk Dikonsumsi)" if prediction == 1 else "Tidak Dapat Diminum (Tidak Aman untuk Dikonsumsi)"
+        # Make predictions using the Random Forest model
+        prediction = random_forest_model.predict(scaled_input)[0]
+        prediction_label = "Dapat Diminum (Aman untuk Dikonsumsi)" if prediction == 1 else "Tidak Dapat Diminum (Tidak Aman untuk Dikonsumsi)"
+        st.session_state.prediction_label = prediction_label
 
-    # Display results in the result tab
+        # Store prediction probabilities
+        if hasattr(random_forest_model, "predict_proba"):
+            probabilities = random_forest_model.predict_proba(scaled_input)
+            st.session_state.probabilities = probabilities
+
+        # Switch to the result tab
+        st.session_state.active_tab = "Hasil Prediksi"
+
+# Handle result tab
+if st.session_state.active_tab == "Hasil Prediksi":
     with result_tab:
         st.header("Hasil Prediksi")
 
         # Display user input data
         st.write("### Data yang Dimasukkan")
-        st.write(input_data_indonesia)
+        st.write(st.session_state.get("input_data", "Data tidak tersedia."))
 
         # Display prediction result
         st.write("### Prediksi")
-        st.success(f"**{prediction_label}**")
+        st.success(f"**{st.session_state.get('prediction_label', 'Belum ada hasil prediksi.')}**")
 
         # Display prediction probabilities if available
-        if hasattr(random_forest_model, "predict_proba"):
-            probabilities = random_forest_model.predict_proba(scaled_input)
+        if "probabilities" in st.session_state:
             st.write("### Probabilitas Prediksi")
-            st.write(pd.DataFrame(probabilities, columns=["Tidak Dapat Diminum", "Dapat Diminum"]))
+            st.write(pd.DataFrame(st.session_state.probabilities, columns=["Tidak Dapat Diminum", "Dapat Diminum"]))
