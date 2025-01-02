@@ -16,16 +16,20 @@ st.write("Gunakan aplikasi ini untuk memprediksi apakah air dapat diminum berdas
 
 # Input section
 st.header("Masukkan Parameter Kualitas Air")
+col1, col2 = st.columns(2)
 
-ph = st.slider("Tingkat pH", 0.0, 14.0, 7.0)
-hardness = st.slider("Kekerasan (mg/L)", 0.0, 300.0, 100.0)
-solids = st.slider("Padatan Terlarut (mg/L)", 0.0, 50000.0, 20000.0)
-chloramines = st.slider("Kloramin (ppm)", 0.0, 12.0, 6.0)
-sulfate = st.slider("Sulfat (mg/L)", 0.0, 500.0, 200.0)
-conductivity = st.slider("Konduktivitas (uS/cm)", 0.0, 800.0, 400.0)
-organic_carbon = st.slider("Karbon Organik (ppm)", 0.0, 30.0, 15.0)
-trihalomethanes = st.slider("Trihalometana (ppb)", 0.0, 120.0, 60.0)
-turbidity = st.slider("Kekeruhan (NTU)", 0.0, 5.0, 2.5)
+with col1:
+    ph = st.slider("Tingkat pH", 0.0, 14.0, 7.0)
+    hardness = st.slider("Kekerasan (mg/L)", 0.0, 300.0, 100.0)
+    solids = st.slider("Padatan Terlarut (mg/L)", 0.0, 50000.0, 20000.0)
+    chloramines = st.slider("Kloramin (ppm)", 0.0, 12.0, 6.0)
+    sulfate = st.slider("Sulfat (mg/L)", 0.0, 500.0, 200.0)
+
+with col2:
+    conductivity = st.slider("Konduktivitas (uS/cm)", 0.0, 800.0, 400.0)
+    organic_carbon = st.slider("Karbon Organik (ppm)", 0.0, 30.0, 15.0)
+    trihalomethanes = st.slider("Trihalometana (ppb)", 0.0, 120.0, 60.0)
+    turbidity = st.slider("Kekeruhan (NTU)", 0.0, 5.0, 2.5)
 
 if st.button("Prediksi Kualitas Air"):
     # Combine user input into a DataFrame
