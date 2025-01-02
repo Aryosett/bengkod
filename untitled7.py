@@ -11,11 +11,11 @@ if "prediction_result" not in st.session_state:
     st.session_state.prediction_result = None
 
 # Streamlit App Title
-st.title("Water Quality Prediction Application")
-st.write("Use this application to predict whether water is drinkable based on its quality parameters.")
+st.title("Aplikasi Prediksi Kualitas Air")
+st.write("Gunakan aplikasi ini untuk memprediksi apakah air dapat diminum berdasarkan parameter kualitas air.")
 
 # Input section
-st.header("Enter Water Quality Parameters")
+st.header("Masukkan Parameter Kualitas Air")
 col1, col2 = st.columns(2)
 
 with col1:
@@ -31,7 +31,7 @@ with col2:
     trihalomethanes = st.slider("Trihalomethanes (ppb)", 0.0, 120.0, 50.0)
     turbidity = st.slider("Turbidity (NTU)", 0.0, 5.0, 2.5)
 
-if st.button("Predict Water Quality"):
+if st.button("Cek Kualitas Air"):
     # Combine user input into a DataFrame with correct column names
     input_data = pd.DataFrame({
         'pH Level': [ph],
@@ -79,16 +79,16 @@ if st.button("Predict Water Quality"):
 
 # Result section
 if st.session_state.prediction_result:
-    st.header("Prediction Results")
+    st.header("Hasil Prediksi")
     st.write("### Input Data")
     st.write(st.session_state.prediction_result["input_data"])
 
-    st.write("### Prediction")
+    st.write("### Prediksi")
     st.success(st.session_state.prediction_result["prediction_label"])
 
     if st.session_state.prediction_result["probabilities"] is not None:
-        st.write("### Prediction Probabilities")
+        st.write("### Probabilitas Prediksi")
         st.write(pd.DataFrame(
             st.session_state.prediction_result["probabilities"],
-            columns=["Non-Drinkable", "Drinkable"]
+            columns=["Tidak Dapat Diminum", "Dapat Diminum"]
         ))
