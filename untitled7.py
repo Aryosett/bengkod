@@ -64,9 +64,9 @@ if st.button("Cek Kualitas Air"):
     # Make predictions
     prediction = random_forest_model.predict(scaled_input)[0]
     prediction_label = (
-        "Drinkable (Safe for Consumption)"
+        "Dapat Diminum (Aman untuk Dikonsumsi)"
         if prediction == 1 else
-        "Non-Drinkable (Not Safe for Consumption)"
+        "Tidak Dapat Diminum (Tidak Aman untuk Dikonsumsi)"
     )
 
     # Store result in session state
