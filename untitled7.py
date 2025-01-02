@@ -57,46 +57,34 @@ st.header("Masukkan Parameter Kualitas Air")
 col1, col2 = st.columns(2)
 
 with col1:
-    ph = st.slider("Tingkat pH", 0.0, 14.0, 7.0, help="Skala pH air untuk menentukan tingkat keasaman atau kebasaan.")
-    hardness = st.slider("Kekerasan (mg/L)", 0.0, 300.0, 100.0, help="Kekerasan air yang diukur berdasarkan kandungan kalsium dan magnesium.")
-    solids = st.slider("Padatan Terlarut (mg/L)", 0.0, 50000.0, 20000.0, help="Jumlah padatan terlarut dalam air.")
-    chloramines = st.slider("Kloramin (ppm)", 0.0, 12.0, 6.0, help="Kadar kloramin dalam air.")
-    sulfate = st.slider("Sulfat (mg/L)", 0.0, 500.0, 200.0, help="Kadar sulfat yang terkandung dalam air.")
+    ph = st.slider("pH Level", 0.0, 14.0, 4.0, help="Skala pH air untuk menentukan tingkat keasaman atau kebasaan.")
+    hardness = st.slider("Hardness (mg/L)", 0.0, 300.0, 150.0, help="Kekerasan air yang diukur berdasarkan kandungan kalsium dan magnesium.")
+    solids = st.slider("Dissolved Solids (mg/L)", 0.0, 30000.0, 20000.0, help="Jumlah padatan terlarut dalam air.")
+    chloramines = st.slider("Chloramines (ppm)", 0.0, 18.0, 6.0, help="Kadar kloramin dalam air.")
+    sulfate = st.slider("Sulfate (mg/L)", 0.0, 500.0, 150.0, help="Kadar sulfat yang terkandung dalam air.")
 
 with col2:
-    conductivity = st.slider("Konduktivitas (uS/cm)", 0.0, 800.0, 400.0, help="Kemampuan air untuk menghantarkan listrik.")
-    organic_carbon = st.slider("Karbon Organik (ppm)", 0.0, 30.0, 15.0, help="Kadar karbon organik dalam air.")
-    trihalomethanes = st.slider("Trihalometana (ppb)", 0.0, 120.0, 60.0, help="Kadar trihalomethanes dalam air.")
-    turbidity = st.slider("Kekeruhan (NTU)", 0.0, 5.0, 2.5, help="Kekeruhan air yang dapat mempengaruhi kualitasnya.")
+    conductivity = st.slider("Conductivity (uS/cm)", 0.0, 800.0, 350.0, help="Kemampuan air untuk menghantarkan listrik.")
+    organic_carbon = st.slider("Organic Carbon (ppm)", 0.0, 30.0, 15.0, help="Kadar karbon organik dalam air.")
+    trihalomethanes = st.slider("Trihalomethanes (ppb)", 0.0, 120.0, 60.0, help="Kadar trihalomethanes dalam air.")
+    turbidity = st.slider("Turbidity (NTU)", 0.0, 5.0, 4.5, help="Kekeruhan air yang dapat mempengaruhi kualitasnya.")
 
 # Button to make predictions
 if st.button("🔮 Prediksi Kualitas Air", use_container_width=True):
     # Combine user input into a DataFrame
-    input_data_indonesia = pd.DataFrame({
-        'Tingkat pH': [ph],
-        'Kekerasan (mg/L)': [hardness],
-        'Padatan Terlarut (mg/L)': [solids],
-        'Kloramin (ppm)': [chloramines],
-        'Sulfat (mg/L)': [sulfate],
-        'Konduktivitas (uS/cm)': [conductivity],
-        'Karbon Organik (ppm)': [organic_carbon],
-        'Trihalometana (ppb)': [trihalomethanes],
-        'Kekeruhan (NTU)': [turbidity]
+    input_data = pd.DataFrame({
+        'pH Level': [ph],
+        'Hardness (mg/L)': [hardness],
+        'Dissolved Solids (mg/L)': [solids],
+        'Chloramines (ppm)': [chloramines],
+        'Sulfate (mg/L)': [sulfate],
+        'Conductivity (uS/cm)': [conductivity],
+        'Organic Carbon (ppm)': [organic_carbon],
+        'Trihalomethanes (ppb)': [trihalomethanes],
+        'Turbidity (NTU)': [turbidity]
     })
 
-    input_data_english = input_data_indonesia.rename(columns={
-        'Tingkat pH': 'ph',
-        'Kekerasan (mg/L)': 'Hardness',
-        'Padatan Terlarut (mg/L)': 'Solids',
-        'Kloramin (ppm)': 'Chloramines',
-        'Sulfat (mg/L)': 'Sulfate',
-        'Konduktivitas (uS/cm)': 'Conductivity',
-        'Karbon Organik (ppm)': 'Organic_carbon',
-        'Trihalometana (ppb)': 'Trihalomethanes',
-        'Kekeruhan (NTU)': 'Turbidity'
-    })
-
-    scaled_input = scaler.transform(input_data_english)
+    scaled_input = scaler.transform(input_data)
 
     # Make predictions
     prediction = random_forest_model.predict(scaled_input)[0]
@@ -108,7 +96,7 @@ if st.button("🔮 Prediksi Kualitas Air", use_container_width=True):
 
     # Store result in session state
     st.session_state.prediction_result = {
-        "input_data": input_data_indonesia,
+        "input_data": input_data,
         "prediction_label": prediction_label,
         "probabilities": random_forest_model.predict_proba(scaled_input)
         if hasattr(random_forest_model, "predict_proba") else None
