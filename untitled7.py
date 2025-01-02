@@ -6,72 +6,33 @@ import joblib
 random_forest_model = joblib.load('random_forest.pkl')  # Ensure the model file is in the same directory
 scaler = joblib.load('scaler.pkl')  # Ensure the scaler file is in the same directory
 
-# Set the Streamlit page configuration
-st.set_page_config(
-    page_title="Aplikasi Prediksi Kualitas Air",
-    page_icon="🌊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 # Initialize session state
 if "prediction_result" not in st.session_state:
     st.session_state.prediction_result = None
 
-# Set page background color and font style
-st.markdown(
-    """
-    <style>
-    body {
-        background-color: #f0f8ff;  /* Color changed to a light pastel blue */
-        font-family: 'Arial', sans-serif;
-    }
-    .stButton>button {
-        background-color: #0288d1;
-        color: white;
-        font-size: 16px;
-        border-radius: 8px;
-        padding: 10px 20px;
-    }
-    .stButton>button:hover {
-        background-color: #0277bd;
-    }
-    .stSuccess>div>div>div {
-        background-color: #388e3c;
-    }
-    .stSlider>div>div {
-        background-color: #0288d1;
-        border-radius: 5px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Streamlit App Title
-st.title("🌊 Aplikasi Prediksi Kualitas Air")
-st.write("Gunakan aplikasi ini untuk memprediksi apakah air dapat diminum berdasarkan parameter kualitas air.")
+st.title("Water Quality Prediction Application")
+st.write("Use this application to predict whether water is drinkable based on its quality parameters.")
 
 # Input section
-st.header("Masukkan Parameter Kualitas Air")
+st.header("Enter Water Quality Parameters")
 col1, col2 = st.columns(2)
 
 with col1:
-    ph = st.slider("pH Level", 0.0, 14.0, 4.0, help="Skala pH air untuk menentukan tingkat keasaman atau kebasaan.")
-    hardness = st.slider("Hardness (mg/L)", 0.0, 300.0, 150.0, help="Kekerasan air yang diukur berdasarkan kandungan kalsium dan magnesium.")
-    solids = st.slider("Dissolved Solids (mg/L)", 0.0, 30000.0, 20000.0, help="Jumlah padatan terlarut dalam air.")
-    chloramines = st.slider("Chloramines (ppm)", 0.0, 18.0, 6.0, help="Kadar kloramin dalam air.")
-    sulfate = st.slider("Sulfate (mg/L)", 0.0, 500.0, 150.0, help="Kadar sulfat yang terkandung dalam air.")
+    ph = st.slider("pH Level", 0.0, 14.0, 7.0)
+    hardness = st.slider("Hardness (mg/L)", 0.0, 300.0, 100.0)
+    solids = st.slider("Dissolved Solids (mg/L)", 0.0, 50000.0, 20000.0)
+    chloramines = st.slider("Chloramines (ppm)", 0.0, 12.0, 6.0)
+    sulfate = st.slider("Sulfate (mg/L)", 0.0, 500.0, 200.0)
 
 with col2:
-    conductivity = st.slider("Conductivity (uS/cm)", 0.0, 800.0, 350.0, help="Kemampuan air untuk menghantarkan listrik.")
-    organic_carbon = st.slider("Organic Carbon (ppm)", 0.0, 30.0, 15.0, help="Kadar karbon organik dalam air.")
-    trihalomethanes = st.slider("Trihalomethanes (ppb)", 0.0, 120.0, 60.0, help="Kadar trihalomethanes dalam air.")
-    turbidity = st.slider("Turbidity (NTU)", 0.0, 5.0, 4.5, help="Kekeruhan air yang dapat mempengaruhi kualitasnya.")
+    conductivity = st.slider("Conductivity (uS/cm)", 0.0, 800.0, 400.0)
+    organic_carbon = st.slider("Organic Carbon (ppm)", 0.0, 30.0, 15.0)
+    trihalomethanes = st.slider("Trihalomethanes (ppb)", 0.0, 120.0, 60.0)
+    turbidity = st.slider("Turbidity (NTU)", 0.0, 5.0, 2.5)
 
-# Button to make predictions
-if st.button("🔮 Prediksi Kualitas Air", use_container_width=True):
-    # Combine user input into a DataFrame
+if st.button("Predict Water Quality"):
+    # Combine user input into a DataFrame with correct column names
     input_data = pd.DataFrame({
         'pH Level': [ph],
         'Hardness (mg/L)': [hardness],
@@ -84,14 +45,28 @@ if st.button("🔮 Prediksi Kualitas Air", use_container_width=True):
         'Turbidity (NTU)': [turbidity]
     })
 
-    scaled_input = scaler.transform(input_data)
+    # Rename columns to match the scaler's feature names (ensure these are what the scaler expects)
+    input_data_english = input_data.rename(columns={
+        'pH Level': 'ph',
+        'Hardness (mg/L)': 'Hardness',
+        'Dissolved Solids (mg/L)': 'Solids',
+        'Chloramines (ppm)': 'Chloramines',
+        'Sulfate (mg/L)': 'Sulfate',
+        'Conductivity (uS/cm)': 'Conductivity',
+        'Organic Carbon (ppm)': 'Organic_carbon',
+        'Trihalomethanes (ppb)': 'Trihalomethanes',
+        'Turbidity (NTU)': 'Turbidity'
+    })
+
+    # Ensure the input data columns match the scaler's expected feature names
+    scaled_input = scaler.transform(input_data_english)
 
     # Make predictions
     prediction = random_forest_model.predict(scaled_input)[0]
     prediction_label = (
-        "Dapat Diminum (Aman untuk Dikonsumsi)"
+        "Drinkable (Safe for Consumption)"
         if prediction == 1 else
-        "Tidak Dapat Diminum (Tidak Aman untuk Dikonsumsi)"
+        "Non-Drinkable (Not Safe for Consumption)"
     )
 
     # Store result in session state
@@ -104,16 +79,16 @@ if st.button("🔮 Prediksi Kualitas Air", use_container_width=True):
 
 # Result section
 if st.session_state.prediction_result:
-    st.header("Hasil Prediksi")
-    st.write("### Data yang Dimasukkan")
+    st.header("Prediction Results")
+    st.write("### Input Data")
     st.write(st.session_state.prediction_result["input_data"])
 
-    st.write("### Prediksi")
+    st.write("### Prediction")
     st.success(st.session_state.prediction_result["prediction_label"])
 
     if st.session_state.prediction_result["probabilities"] is not None:
-        st.write("### Probabilitas Prediksi")
+        st.write("### Prediction Probabilities")
         st.write(pd.DataFrame(
             st.session_state.prediction_result["probabilities"],
-            columns=["Tidak Dapat Diminum", "Dapat Diminum"]
+            columns=["Non-Drinkable", "Drinkable"]
         ))
