@@ -11,80 +11,111 @@ if "prediction_result" not in st.session_state:
     st.session_state.prediction_result = None
 
 # Streamlit App Title
-st.title("\ud83d\udca7 Aplikasi Prediksi Kualitas Air")
-st.write("Gunakan aplikasi ini untuk memprediksi apakah air dapat diminum berdasarkan parameter kualitas air.")
+st.title("🌊 Aplikasi Prediksi Kualitas Air")
+st.markdown("""
+Gunakan aplikasi ini untuk memprediksi apakah air dapat diminum berdasarkan parameter kualitas air. 
+Masukkan nilai-nilai parameter yang relevan di bawah ini untuk mendapatkan hasil prediksi.
+""")
 
-# Input section
-st.sidebar.header("Masukkan Parameter Kualitas Air")
+# Input Section
+st.header("📊 Masukkan Parameter Kualitas Air")
+with st.expander("💡 Petunjuk Penggunaan"):
+    st.write("""
+    - **pH Level**: Skala keasaman atau kebasaan air (0 - 14).
+    - **Hardness (mg/L)**: Tingkat kekerasan air dalam miligram per liter.
+    - **Dissolved Solids (mg/L)**: Jumlah zat padat terlarut dalam air.
+    - **Chloramines (ppm)**: Konsentrasi kloramin dalam air.
+    - **Sulfate (mg/L)**: Kandungan sulfat dalam miligram per liter.
+    - **Conductivity (uS/cm)**: Kemampuan air menghantarkan listrik.
+    - **Organic Carbon (ppm)**: Kandungan karbon organik dalam air.
+    - **Trihalomethanes (ppb)**: Senyawa kimia dalam air.
+    - **Turbidity (NTU)**: Kekeruhan air.
+    """)
 
-ph = st.sidebar.slider("pH Level", 0.0, 14.0, 7.0)
-hardness = st.sidebar.slider("Hardness (mg/L)", 0.0, 300.0, 150.0)
-solids = st.sidebar.slider("Dissolved Solids (mg/L)", 0.0, 50000.0, 20000.0)
-chloramines = st.sidebar.slider("Chloramines (ppm)", 0.0, 12.0, 4.0)
-sulfate = st.sidebar.slider("Sulfate (mg/L)", 0.0, 500.0, 250.0)
-conductivity = st.sidebar.slider("Conductivity (uS/cm)", 0.0, 800.0, 400.0)
-organic_carbon = st.sidebar.slider("Organic Carbon (ppm)", 0.0, 30.0, 15.0)
-trihalomethanes = st.sidebar.slider("Trihalomethanes (ppb)", 0.0, 120.0, 60.0)
-turbidity = st.sidebar.slider("Turbidity (NTU)", 0.0, 5.0, 2.5)
+# Layout for inputs
+col1, col2 = st.columns(2)
 
-if st.sidebar.button("\ud83c\udf10 Cek Kualitas Air"):
-    # Combine user input into a DataFrame with correct column names
-    input_data = pd.DataFrame({
-        'pH Level': [ph],
-        'Hardness (mg/L)': [hardness],
-        'Dissolved Solids (mg/L)': [solids],
-        'Chloramines (ppm)': [chloramines],
-        'Sulfate (mg/L)': [sulfate],
-        'Conductivity (uS/cm)': [conductivity],
-        'Organic Carbon (ppm)': [organic_carbon],
-        'Trihalomethanes (ppb)': [trihalomethanes],
-        'Turbidity (NTU)': [turbidity]
-    })
+with col1:
+    ph = st.slider("🌡️ pH Level", 0.0, 14.0, 7.0)
+    hardness = st.slider("🧴 Hardness (mg/L)", 0.0, 300.0, 150.0)
+    solids = st.slider("🧊 Dissolved Solids (mg/L)", 0.0, 50000.0, 20000.0)
+    chloramines = st.slider("🧪 Chloramines (ppm)", 0.0, 12.0, 4.0)
+    sulfate = st.slider("🔬 Sulfate (mg/L)", 0.0, 500.0, 250.0)
 
-    # Rename columns to match the scaler's feature names (ensure these are what the scaler expects)
-    input_data_english = input_data.rename(columns={
-        'pH Level': 'ph',
-        'Hardness (mg/L)': 'Hardness',
-        'Dissolved Solids (mg/L)': 'Solids',
-        'Chloramines (ppm)': 'Chloramines',
-        'Sulfate (mg/L)': 'Sulfate',
-        'Conductivity (uS/cm)': 'Conductivity',
-        'Organic Carbon (ppm)': 'Organic_carbon',
-        'Trihalomethanes (ppb)': 'Trihalomethanes',
-        'Turbidity (NTU)': 'Turbidity'
-    })
+with col2:
+    conductivity = st.slider("⚡ Conductivity (uS/cm)", 0.0, 800.0, 400.0)
+    organic_carbon = st.slider("🌿 Organic Carbon (ppm)", 0.0, 30.0, 10.0)
+    trihalomethanes = st.slider("🧴 Trihalomethanes (ppb)", 0.0, 120.0, 50.0)
+    turbidity = st.slider("💧 Turbidity (NTU)", 0.0, 5.0, 1.0)
 
-    # Ensure the input data columns match the scaler's expected feature names
-    scaled_input = scaler.transform(input_data_english)
+# Prediction button
+if st.button("🔍 Cek Kualitas Air"):
+    try:
+        # Combine user input into a DataFrame
+        input_data = pd.DataFrame({
+            'pH Level': [ph],
+            'Hardness (mg/L)': [hardness],
+            'Dissolved Solids (mg/L)': [solids],
+            'Chloramines (ppm)': [chloramines],
+            'Sulfate (mg/L)': [sulfate],
+            'Conductivity (uS/cm)': [conductivity],
+            'Organic Carbon (ppm)': [organic_carbon],
+            'Trihalomethanes (ppb)': [trihalomethanes],
+            'Turbidity (NTU)': [turbidity]
+        })
 
-    # Make predictions
-    prediction = random_forest_model.predict(scaled_input)[0]
-    prediction_label = (
-        "\ud83c\udf0a Dapat Diminum (Aman untuk Dikonsumsi)"
-        if prediction == 1 else
-        "\u26a0\ufe0f Tidak Dapat Diminum (Tidak Aman untuk Dikonsumsi)"
-    )
+        # Rename columns for scaler compatibility
+        input_data_english = input_data.rename(columns={
+            'pH Level': 'ph',
+            'Hardness (mg/L)': 'Hardness',
+            'Dissolved Solids (mg/L)': 'Solids',
+            'Chloramines (ppm)': 'Chloramines',
+            'Sulfate (mg/L)': 'Sulfate',
+            'Conductivity (uS/cm)': 'Conductivity',
+            'Organic Carbon (ppm)': 'Organic_carbon',
+            'Trihalomethanes (ppb)': 'Trihalomethanes',
+            'Turbidity (NTU)': 'Turbidity'
+        })
 
-    # Store result in session state
-    st.session_state.prediction_result = {
-        "input_data": input_data,
-        "prediction_label": prediction_label,
-        "probabilities": random_forest_model.predict_proba(scaled_input)
-        if hasattr(random_forest_model, "predict_proba") else None
-    }
+        # Scale input data
+        scaled_input = scaler.transform(input_data_english)
 
-# Result section
+        # Make prediction
+        prediction = random_forest_model.predict(scaled_input)[0]
+        prediction_label = (
+            "✅ **Dapat Diminum (Aman untuk Dikonsumsi)**"
+            if prediction == 1 else
+            "🚫 **Tidak Dapat Diminum (Tidak Aman untuk Dikonsumsi)**"
+        )
+
+        # Store results
+        st.session_state.prediction_result = {
+            "input_data": input_data,
+            "prediction_label": prediction_label,
+            "probabilities": random_forest_model.predict_proba(scaled_input)
+            if hasattr(random_forest_model, "predict_proba") else None
+        }
+    except Exception as e:
+        st.error(f"Terjadi kesalahan: {e}")
+
+# Result Section
 if st.session_state.prediction_result:
-    st.header("\ud83d\udcca Hasil Prediksi")
-    st.write("### Input Data")
-    st.write(st.session_state.prediction_result["input_data"])
+    st.header("📋 Hasil Prediksi")
+    tab1, tab2 = st.tabs(["📈 Hasil Prediksi", "📊 Detail Probabilitas"])
 
-    st.write("### Prediksi")
-    st.success(st.session_state.prediction_result["prediction_label"])
+    with tab1:
+        st.write("### Input Data")
+        st.table(st.session_state.prediction_result["input_data"])
 
-    if st.session_state.prediction_result["probabilities"] is not None:
-        st.write("### Probabilitas Prediksi")
-        st.write(pd.DataFrame(
-            st.session_state.prediction_result["probabilities"],
-            columns=["Tidak Dapat Diminum", "Dapat Diminum"]
-        ))
+        st.write("### Prediksi")
+        st.success(st.session_state.prediction_result["prediction_label"])
+
+    with tab2:
+        if st.session_state.prediction_result["probabilities"] is not None:
+            st.write("### Probabilitas Prediksi")
+            st.bar_chart(pd.DataFrame(
+                st.session_state.prediction_result["probabilities"],
+                columns=["Tidak Dapat Diminum", "Dapat Diminum"]
+            ))
+        else:
+            st.warning("Model ini tidak mendukung probabilitas.")
