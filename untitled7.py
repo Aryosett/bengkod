@@ -23,7 +23,7 @@ st.markdown(
     """
     <style>
     body {
-        background-color: #e0f7fa;
+        background-color: #f0f8ff;  /* Color changed to a light pastel blue */
         font-family: 'Arial', sans-serif;
     }
     .stButton>button {
