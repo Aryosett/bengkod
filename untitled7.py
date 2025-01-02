@@ -19,16 +19,16 @@ st.header("Enter Water Quality Parameters")
 col1, col2 = st.columns(2)
 
 with col1:
-    ph = st.slider("pH Level", 0.0, 14.0, 7.0)
-    hardness = st.slider("Hardness (mg/L)", 0.0, 300.0, 100.0)
-    solids = st.slider("Dissolved Solids (mg/L)", 0.0, 50000.0, 20000.0)
-    chloramines = st.slider("Chloramines (ppm)", 0.0, 12.0, 6.0)
-    sulfate = st.slider("Sulfate (mg/L)", 0.0, 500.0, 200.0)
+    ph = st.slider("pH Level", 0.0, 14.0, 10.0)
+    hardness = st.slider("Hardness (mg/L)", 0.0, 300.0, 50.0)
+    solids = st.slider("Dissolved Solids (mg/L)", 0.0, 50000.0, 35000.0)
+    chloramines = st.slider("Chloramines (ppm)", 0.0, 12.0, 8.0)
+    sulfate = st.slider("Sulfate (mg/L)", 0.0, 500.0, 400.0)
 
 with col2:
-    conductivity = st.slider("Conductivity (uS/cm)", 0.0, 800.0, 400.0)
-    organic_carbon = st.slider("Organic Carbon (ppm)", 0.0, 30.0, 15.0)
-    trihalomethanes = st.slider("Trihalomethanes (ppb)", 0.0, 120.0, 60.0)
+    conductivity = st.slider("Conductivity (uS/cm)", 0.0, 800.0, 700.0)
+    organic_carbon = st.slider("Organic Carbon (ppm)", 0.0, 30.0, 20.0)
+    trihalomethanes = st.slider("Trihalomethanes (ppb)", 0.0, 120.0, 50.0)
     turbidity = st.slider("Turbidity (NTU)", 0.0, 5.0, 2.5)
 
 if st.button("Predict Water Quality"):
