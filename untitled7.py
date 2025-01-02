@@ -16,13 +16,6 @@ import os
 random_forest_model = joblib.load('random_forest.pkl')  # Ensure the model file is in the same directory
 scaler = joblib.load('scaler.pkl')  # Ensure the scaler file is in the same directory
 
-# Function to load custom CSS
-def load_css(css_file):
-    with open(css_file) as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-# Load CSS
-load_css("styles.css")
 
 # Streamlit App Title
 st.title("Aplikasi Prediksi Kualitas Air")
